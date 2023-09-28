@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -19,6 +20,17 @@ func (c *Commander) HandleUpdate(update tgbotapi.Update) {
 			fmt.Printf("recovered from panic: %v", panicValue)
 		}
 	}()
+
+	if update.CallbackQuery != nil {
+		args := strings.Split(update.CallbackQuery.Data, "_")
+		msg := tgbotapi.NewMessage(
+			update.CallbackQuery.Message.Chat.ID,
+			fmt.Sprintf("Command: %s\n", args[0])+
+				fmt.Sprintf("Offset: %s\n", args[1]),
+		)
+		c.bot.Send(msg)
+		return
+	}
 
 	if update.Message == nil {
 		return
